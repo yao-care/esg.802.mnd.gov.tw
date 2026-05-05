@@ -1,0 +1,13 @@
+document_id: MTX-EMISSION
+type: MTX
+title_zh: 溫室氣體排放源清冊
+title_en: GHG Emission Source Inventory
+main:
+  zh: 溫室氣體排放源清冊.md
+status: active
+owner: 永續發展室
+effective_date: 2026-03-19
+next_review_date: 2027-03-19
+references:
+  - RPT-GHG-2025
+  - GDL-CALC-METHOD

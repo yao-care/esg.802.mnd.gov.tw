@@ -1,0 +1,41 @@
+document_id: FRM-DATA-FUEL
+type: FRM
+title_zh: 油料活動數據月報表
+title_en: Monthly Fuel Data Collection Form
+main:
+  zh: 油料活動數據月報表.md
+status: active
+owner: 醫勤組
+effective_date: 2026-03-19
+next_review_date: 2027-03-19
+fields:
+  - name: reporting_month
+    label: 填報月份
+    type: text
+    required: true
+  - name: fuel_type
+    label: 燃料種類
+    type: select
+    options: [天然氣, 液化石油氣, 柴油(發電機), 車用汽油, 車用柴油, 車用尿素]
+    required: true
+  - name: equipment
+    label: 使用設施
+    type: text
+    required: true
+  - name: quantity
+    label: 使用量
+    type: number
+    required: true
+  - name: unit
+    label: 單位
+    type: select
+    options: [度(m³), 公斤, 公升]
+    required: true
+  - name: invoice_ref
+    label: 發票/憑證編號
+    type: text
+    required: true
+  - name: notes
+    label: 備註
+    type: textarea
+    required: false

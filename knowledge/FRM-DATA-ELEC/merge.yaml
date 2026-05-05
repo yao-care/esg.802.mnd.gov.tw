@@ -1,0 +1,36 @@
+document_id: FRM-DATA-ELEC
+type: FRM
+title_zh: 電力活動數據月報表
+title_en: Monthly Electricity Data Collection Form
+main:
+  zh: 電力活動數據月報表.md
+status: active
+owner: 工程室
+effective_date: 2026-03-19
+next_review_date: 2027-03-19
+fields:
+  - name: reporting_month
+    label: 填報月份
+    type: text
+    required: true
+  - name: meter_number
+    label: 電號
+    type: select
+    options: ["18323050016", "18323050118", "18323051142", "18323051197"]
+    required: true
+  - name: kwh_reading
+    label: 用電度數
+    type: number
+    required: true
+  - name: billing_period
+    label: 計費區間
+    type: text
+    required: true
+  - name: excluded_kwh
+    label: 排除度數(租用+721營站)
+    type: number
+    required: false
+  - name: bill_ref
+    label: 電費單編號
+    type: text
+    required: true

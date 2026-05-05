@@ -1,0 +1,40 @@
+document_id: FRM-DATA-GAS
+type: FRM
+title_zh: 氣體鋼瓶及滅火器紀錄表
+title_en: Gas Cylinder and Fire Extinguisher Record Form
+main:
+  zh: 氣體鋼瓶及滅火器紀錄表.md
+status: active
+owner: 職安室
+effective_date: 2026-03-19
+next_review_date: 2027-03-19
+fields:
+  - name: record_date
+    label: 紀錄日期
+    type: date
+    required: true
+  - name: category
+    label: 類別
+    type: select
+    options: [麻醉氣體, CO2氣體鋼瓶, 混合氣體鋼瓶, CO2滅火器, 環保氣體滅火器(HFC-227ea), GCB瓦斯斷路器(SF6), 噴罐]
+    required: true
+  - name: item_name
+    label: 品名/藥材代碼
+    type: text
+    required: true
+  - name: quantity
+    label: 數量(支/瓶)
+    type: number
+    required: true
+  - name: gas_fill_kg
+    label: 氣體填充量(kg/支)
+    type: number
+    required: true
+  - name: total_kg
+    label: 合計填充量(kg)
+    type: number
+    required: true
+  - name: data_source
+    label: 數據來源
+    type: text
+    required: true

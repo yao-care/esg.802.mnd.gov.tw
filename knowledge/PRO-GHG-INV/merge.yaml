@@ -1,0 +1,14 @@
+document_id: PRO-GHG-INV
+type: PRO
+title_zh: 溫室氣體盤查作業程序書
+title_en: GHG Inventory Procedure
+main:
+  zh: 溫室氣體盤查作業程序書.md
+status: active
+owner: 永續發展室
+effective_date: 2026-03-19
+next_review_date: 2027-03-19
+parent_policy: POL-ESG
+references:
+  - RPT-GHG-2025
+  - GDL-CALC-METHOD

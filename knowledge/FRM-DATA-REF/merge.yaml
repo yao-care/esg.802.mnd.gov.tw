@@ -1,0 +1,42 @@
+document_id: FRM-DATA-REF
+type: FRM
+title_zh: 冷媒填充紀錄表
+title_en: Refrigerant Refill Record Form
+main:
+  zh: 冷媒填充紀錄表.md
+status: active
+owner: 工程室
+effective_date: 2026-03-19
+next_review_date: 2027-03-19
+fields:
+  - name: record_date
+    label: 填充日期
+    type: date
+    required: true
+  - name: equipment_type
+    label: 設備類別
+    type: select
+    options: [冷氣/冰水主機, 飲水機, 除濕機, 雜項冷藏設備, 醫用冷藏冷凍設備, 製冰機, 汽車空調, 乾燥機]
+    required: true
+  - name: equipment_id
+    label: 設備編號/位置
+    type: text
+    required: true
+  - name: refrigerant_type
+    label: 冷媒種類
+    type: select
+    options: [R-32, R-134a, R-401A, R-410A, R-404A, R-452A, R-513A, R-449A]
+    required: true
+  - name: fill_amount_kg
+    label: 填充量(kg)
+    type: number
+    required: true
+  - name: fill_reason
+    label: 填充原因
+    type: select
+    options: [新購設備, 維修補充]
+    required: true
+  - name: technician
+    label: 施工人員
+    type: text
+    required: false

@@ -191,7 +191,7 @@
   {
     "id": 28,
     "question": "水資源使用月報表由哪個單位負責每月填報？",
-    "expected_doc_key": "PRO-WATER",
+    "expected_doc_key": "FRM-WATER-MON",
     "identity": "設施管理員",
     "category": "E4-水資源"
   },

@@ -248,8 +248,16 @@ if [ "$REF_COUNT" -gt 0 ]; then
   EMBED_REFS=""
 
   for i in $(seq 0 $((REF_COUNT - 1))); do
-    REF_DOC_ID=$(echo "$MERGE_JSON" | jq -r ".references[$i].document_id")
-    REF_ROLE=$(echo "$MERGE_JSON" | jq -r ".references[$i].role")
+    # Support both string ("DOC-ID") and object ({document_id, role}) formats
+    REF_RAW=$(echo "$MERGE_JSON" | jq -r ".references[$i]")
+    REF_TYPE=$(echo "$MERGE_JSON" | jq -r ".references[$i] | type")
+    if [ "$REF_TYPE" = "string" ]; then
+      REF_DOC_ID="$REF_RAW"
+      REF_ROLE="相關文件"
+    else
+      REF_DOC_ID=$(echo "$MERGE_JSON" | jq -r ".references[$i].document_id")
+      REF_ROLE=$(echo "$MERGE_JSON" | jq -r ".references[$i].role // \"相關文件\"")
+    fi
 
     # Find the target folder by searching documents for matching document_id
     TARGET_FOLDER=""

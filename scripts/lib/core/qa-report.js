@@ -40,11 +40,13 @@
  *   --identity=NAME     Filter by identity
  *   --source=TYPE       Filter by source (document/collected)
  *   --output-dir=DIR    Output directory for reports
+ *   --cli               Use Claude CLI for dynamic questions and answers (no API key needed)
  *   --ci                CI mode (exit 1 if below threshold)
  *   --dry-run           Print questions without running
  */
 
 const crypto = require('node:crypto');
+const { execSync } = require('node:child_process');
 const fs = require('fs');
 const path = require('path');
 const MiniSearch = require('minisearch');
@@ -482,10 +484,11 @@ async function generateDynamicQuestions(allChunks, seedQuestions, cachePath, for
 
     const apiKey = getApiKey();
     const envVar = config.api?.key_env_var || 'ANTHROPIC_API_KEY';
-    if (!apiKey) {
+    const useCli = generateDynamicQuestions._useCli;
+    if (!apiKey && !useCli) {
       if (!generateDynamicQuestions._warned) {
-        console.warn(`[dynamic] No ${envVar} — 跳過動態題產生。動態題需要 API key 才能自動產生，跳過不影響靜態種子題驗證。`);
-        console.warn(`[dynamic] 設定方式：export ${envVar}=your-key`);
+        console.warn(`[dynamic] No ${envVar} — 跳過動態題產生。動態題需要 API key 或 --cli 旗標。`);
+        console.warn(`[dynamic] 設定方式：export ${envVar}=your-key 或加上 --cli 使用 Claude CLI`);
         generateDynamicQuestions._warned = true;
       }
       continue;
@@ -520,30 +523,51 @@ ${chunkTexts}`;
 
     try {
       console.log(`[dynamic] Generating ${needed} questions for ${docKey}...`);
-      const resp = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model,                                                         // [5]
-          max_tokens: 1024,
-          messages: [{
-            role: 'user',
-            content: promptText,
-          }],
-        }),
-      });
 
-      if (!resp.ok) {
-        console.warn(`[dynamic] API error for ${docKey}: ${resp.status}`);
-        continue;
+      let text = '';
+      if (useCli) {
+        // Use Claude CLI (claude -p) for dynamic question generation
+        const tmpPrompt = path.join(PROJECT_ROOT, '.work', 'dynamic-prompt.txt');
+        fs.mkdirSync(path.dirname(tmpPrompt), { recursive: true });
+        fs.writeFileSync(tmpPrompt, promptText, 'utf8');
+        try {
+          text = execSync(`claude -p "$(cat '${tmpPrompt}')" --output-format text`, {
+            encoding: 'utf8',
+            timeout: 60000,
+            cwd: PROJECT_ROOT,
+          });
+        } catch (cliErr) {
+          console.warn(`[dynamic] CLI error for ${docKey}: ${cliErr.message}`);
+          continue;
+        }
+      } else {
+        // Use Anthropic API directly
+        const resp = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+          },
+          body: JSON.stringify({
+            model,                                                       // [5]
+            max_tokens: 1024,
+            messages: [{
+              role: 'user',
+              content: promptText,
+            }],
+          }),
+        });
+
+        if (!resp.ok) {
+          console.warn(`[dynamic] API error for ${docKey}: ${resp.status}`);
+          continue;
+        }
+
+        const data = await resp.json();
+        text = data.content[0]?.text || '';
       }
 
-      const data = await resp.json();
-      const text = data.content[0]?.text || '';
       const jsonMatch = text.match(/\[[\s\S]*\]/);
       if (!jsonMatch) continue;
 
@@ -568,8 +592,8 @@ ${chunkTexts}`;
       console.warn(`[dynamic] Error generating for ${docKey}: ${err.message}`);
     }
 
-    // Rate limit
-    await new Promise(r => setTimeout(r, 300));
+    // Rate limit (skip for CLI mode)
+    if (!useCli) await new Promise(r => setTimeout(r, 300));
   }
 
   // Top-up if total still < 200
@@ -1162,6 +1186,7 @@ async function main() {
     identity: (args.find(a => a.startsWith('--identity=')) || '').replace('--identity=', ''),
     source: (args.find(a => a.startsWith('--source=')) || '').replace('--source=', ''),
     ci: args.includes('--ci'),
+    cli: args.includes('--cli'),
     profile: (() => {
       const eq = args.find(a => a.startsWith('--profile='));
       if (eq) return eq.replace('--profile=', '');
@@ -1200,6 +1225,7 @@ async function main() {
 
   // Dynamic questions
   if (!flags.seedOnly) {
+    generateDynamicQuestions._useCli = flags.cli;
     const cachePath = path.join(__dirname, `qa-dynamic-cache-${flags.profile}.json`);
     const dynamic = await generateDynamicQuestions(allChunks, questions, cachePath, flags.refreshDynamic);
 
@@ -1325,7 +1351,7 @@ async function main() {
     let citationCorrect = false;
     let hasCitationFormat = false;
 
-    if (!flags.searchOnly && apiKey) {
+    if (!flags.searchOnly && (apiKey || flags.cli)) {
       // Layer 3: Hard gate — skip LLM if no search results
       if (searchResults.length === 0) {
         answer = noResultMessage;
@@ -1338,32 +1364,47 @@ async function main() {
           .map(r => `【${r.title || r.doc_key}】（引用鍵：${r.doc_key}）\n${r.text || ''}`)
           .join('\n\n---\n\n');
 
-        try {
-          const resp = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': apiKey,
-              'anthropic-version': '2023-06-01',
-            },
-            body: JSON.stringify({
-              model,                                                       // [5]
-              max_tokens: 1000,
-              system: systemPrompt,
-              messages: [{
-                role: 'user',
-                content: context
-                  ? `參考資料：\n${context}\n\n問題：${q.question}`
-                  : `問題：${q.question}\n\n（無相關參考資料）`,
-              }],
-            }),
-          });
+        const userMessage = context
+          ? `參考資料：\n${context}\n\n問題：${q.question}`
+          : `問題：${q.question}\n\n（無相關參考資料）`;
 
-          if (resp.ok) {
-            const data = await resp.json();
-            answer = data.content[0]?.text || '';
+        try {
+          if (flags.cli) {
+            // Use Claude CLI
+            const tmpPrompt = path.join(PROJECT_ROOT, '.work', 'qa-prompt.txt');
+            fs.mkdirSync(path.dirname(tmpPrompt), { recursive: true });
+            fs.writeFileSync(tmpPrompt, `${systemPrompt}\n\n---\n\n${userMessage}`, 'utf8');
+            answer = execSync(`claude -p "$(cat '${tmpPrompt}')" --output-format text`, {
+              encoding: 'utf8',
+              timeout: 120000,
+              cwd: PROJECT_ROOT,
+            }).trim();
           } else {
-            console.warn(`  API error: ${resp.status}`);
+            // Use Anthropic API
+            const resp = await fetch('https://api.anthropic.com/v1/messages', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey,
+                'anthropic-version': '2023-06-01',
+              },
+              body: JSON.stringify({
+                model,                                                     // [5]
+                max_tokens: 1000,
+                system: systemPrompt,
+                messages: [{
+                  role: 'user',
+                  content: userMessage,
+                }],
+              }),
+            });
+
+            if (resp.ok) {
+              const data = await resp.json();
+              answer = data.content[0]?.text || '';
+            } else {
+              console.warn(`  API error: ${resp.status}`);
+            }
           }
         } catch (err) {
           console.warn(`  Error: ${err.message}`);
@@ -1374,8 +1415,8 @@ async function main() {
         citationCorrect = searchHit || answer.includes(q.expected_doc_key);
       }
 
-      // Rate limit
-      await new Promise(r => setTimeout(r, 500));
+      // Rate limit (skip for CLI)
+      if (!flags.cli) await new Promise(r => setTimeout(r, 500));
     } else if (flags.searchOnly) {
       hasAnswer = true; // N/A
       citationCorrect = searchHit;

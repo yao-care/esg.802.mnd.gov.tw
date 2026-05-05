@@ -104,6 +104,7 @@ fi
 
 find . -maxdepth 1 -not -name '.git' -not -name '.' -not -name 'node_modules' -exec rm -rf {} + 2>/dev/null || true
 cp -r "$OUTPUT/"* .
+echo 'node_modules/' > .gitignore
 
 git add -A
 git commit -m "publish: knowledge documents $(date '+%Y-%m-%d %H:%M')" || echo "No changes"

@@ -1,0 +1,73 @@
+name: "病患滿意度調查"
+description: "病患滿意度資料登錄"
+labels: ["survey", "S3-社會參與"]
+body:
+  - type: input
+    id: survey_date
+    attributes:
+      label: 調查日期
+      placeholder: "YYYY-MM-DD"
+    validations:
+      required: true
+  - type: input
+    id: department
+    attributes:
+      label: 就醫科別
+      placeholder: "例：內科、外科、急診"
+    validations:
+      required: false
+  - type: dropdown
+    id: overall_rating
+    attributes:
+      label: 整體滿意度
+      options:
+        - "5-非常滿意"
+        - "4-滿意"
+        - "3-普通"
+        - "2-不滿意"
+        - "1-非常不滿意"
+    validations:
+      required: true
+  - type: dropdown
+    id: cleanliness
+    attributes:
+      label: 環境清潔
+      options:
+        - "5-非常滿意"
+        - "4-滿意"
+        - "3-普通"
+        - "2-不滿意"
+        - "1-非常不滿意"
+    validations:
+      required: true
+  - type: dropdown
+    id: staff_attitude
+    attributes:
+      label: 人員態度
+      options:
+        - "5-非常滿意"
+        - "4-滿意"
+        - "3-普通"
+        - "2-不滿意"
+        - "1-非常不滿意"
+    validations:
+      required: true
+  - type: dropdown
+    id: wait_time
+    attributes:
+      label: 等候時間
+      options:
+        - "5-非常滿意"
+        - "4-滿意"
+        - "3-普通"
+        - "2-不滿意"
+        - "1-非常不滿意"
+    validations:
+      required: true
+  - type: textarea
+    id: comments
+    attributes:
+      label: 其他意見
+      placeholder: "任何建議或意見"
+    validations:
+      required: false

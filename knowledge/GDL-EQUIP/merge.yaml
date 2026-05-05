@@ -1,0 +1,13 @@
+document_id: GDL-EQUIP
+type: GDL
+title_zh: 設備能源效率指引
+title_en: Equipment Energy Efficiency Guideline
+main:
+  zh: 設備能源效率指引.md
+status: active
+owner: 工程室
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+references:
+  - PLN-ENERGY
+  - RPT-GHG-2025

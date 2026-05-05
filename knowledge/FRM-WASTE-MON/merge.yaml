@@ -1,0 +1,37 @@
+document_id: FRM-WASTE-MON
+type: FRM
+title_zh: 廢棄物處理月報表
+title_en: Monthly Waste Disposal Report Form
+main:
+  zh: 廢棄物處理月報表.md
+status: active
+owner: 環安衛室
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+fields:
+  - name: reporting_month
+    label: 填報月份
+    type: text
+    required: true
+  - name: waste_type
+    label: 廢棄物類別
+    type: select
+    options: [一般事業廢棄物, 感染性事業廢棄物, 有害事業廢棄物]
+    required: true
+  - name: weight_kg
+    label: 重量(kg)
+    type: number
+    required: true
+  - name: contractor
+    label: 清運機構
+    type: text
+    required: true
+  - name: manifest_number
+    label: 聯單編號
+    type: text
+    required: true
+  - name: disposal_method
+    label: 處理方式
+    type: select
+    options: [焚化, 滅菌, 掩埋, 回收再利用]
+    required: true

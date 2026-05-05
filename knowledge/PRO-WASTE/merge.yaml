@@ -1,0 +1,14 @@
+document_id: PRO-WASTE
+type: PRO
+title_zh: 醫療廢棄物管理程序書
+title_en: Medical Waste Management Procedure
+main:
+  zh: 醫療廢棄物管理程序書.md
+status: active
+owner: 環安衛室
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+parent_policy: POL-ESG
+references:
+  - STD-WASTE-REG
+  - FRM-WASTE-MON

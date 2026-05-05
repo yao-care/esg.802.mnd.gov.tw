@@ -1,0 +1,35 @@
+document_id: FRM-WATER-MON
+type: FRM
+title_zh: 用水量監測月報表
+title_en: Monthly Water Usage Monitoring Form
+main:
+  zh: 用水量監測月報表.md
+status: active
+owner: 工程室
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+fields:
+  - name: reporting_month
+    label: 填報月份
+    type: text
+    required: true
+  - name: meter_reading
+    label: 水表讀數(m³)
+    type: number
+    required: true
+  - name: usage
+    label: 當月用水量(m³)
+    type: number
+    required: true
+  - name: prev_month
+    label: 上月用水量(m³)
+    type: number
+    required: false
+  - name: prev_year
+    label: 去年同月用水量(m³)
+    type: number
+    required: false
+  - name: notes
+    label: 備註
+    type: textarea
+    required: false

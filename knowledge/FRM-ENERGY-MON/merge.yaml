@@ -1,0 +1,39 @@
+document_id: FRM-ENERGY-MON
+type: FRM
+title_zh: 能源使用監測月報表
+title_en: Monthly Energy Monitoring Form
+main:
+  zh: 能源使用監測月報表.md
+status: active
+owner: 工程室
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+fields:
+  - name: reporting_month
+    label: 填報月份
+    type: text
+    required: true
+  - name: total_kwh
+    label: 當月總用電(度)
+    type: number
+    required: true
+  - name: excluded_kwh
+    label: 排除用電(度)
+    type: number
+    required: false
+  - name: net_kwh
+    label: 本院淨用電(度)
+    type: number
+    required: true
+  - name: prev_month_kwh
+    label: 上月用電(度)
+    type: number
+    required: false
+  - name: prev_year_kwh
+    label: 去年同月用電(度)
+    type: number
+    required: false
+  - name: notes
+    label: 備註(異常說明)
+    type: textarea
+    required: false

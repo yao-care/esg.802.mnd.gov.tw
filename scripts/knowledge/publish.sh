@@ -102,7 +102,7 @@ else
   git checkout "$PUBLISH_BRANCH"
 fi
 
-find . -maxdepth 1 -not -name '.git' -not -name '.' -exec rm -rf {} + 2>/dev/null || true
+find . -maxdepth 1 -not -name '.git' -not -name '.' -not -name 'node_modules' -exec rm -rf {} + 2>/dev/null || true
 cp -r "$OUTPUT/"* .
 
 git add -A

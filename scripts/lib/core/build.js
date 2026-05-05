@@ -33,6 +33,7 @@
 
 const fs   = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const { loadConfig, PROJECT_ROOT } = require('./config.js');
 const { chunkMarkdown, chunkCollectedResult, chunkReportedRecord } = require('./chunk.js');
@@ -611,6 +612,214 @@ ${rows}
   console.log(`[build] Profile index: ${indexPath}`);
 }
 
+// ---------------------------------------------------------------------------
+// Dashboard data extraction
+// ---------------------------------------------------------------------------
+
+function parseNumber(s) {
+  if (!s) return null;
+  return parseFloat(String(s).replace(/,/g, ''));
+}
+
+function buildDashboardData(config, metaIndex, allChunks) {
+  const docsPath = path.resolve(PROJECT_ROOT, config.data_sources?.documents?.path || 'knowledge/');
+  const metadataFilename = config.domain?.metadata_filename || 'merge.yaml';
+  const now = new Date();
+
+  // 1a. QA Scores — find latest report
+  let qaScores = null;
+  const reportsDir = path.join(PROJECT_ROOT, 'data', 'reports');
+  if (fs.existsSync(reportsDir)) {
+    const reportFiles = fs.readdirSync(reportsDir)
+      .filter(f => f.startsWith('assistant-report-') && f.endsWith('.md'))
+      .sort()
+      .reverse();
+    if (reportFiles.length > 0) {
+      const report = readFileSafe(path.join(reportsDir, reportFiles[0]));
+      if (report) {
+        const hitM = report.match(/搜尋命中率.*?(\d+)\/(\d+)\s*\(([0-9.]+)%\)/);
+        const ansM = report.match(/有效回答率.*?(\d+)\/(\d+)\s*\(([0-9.]+)%\)/);
+        const citM = report.match(/引文正確率.*?(\d+)\/(\d+)\s*\(([0-9.]+)%\)/);
+        const dateM = report.match(/\*\*日期\*\*[：:]\s*(.+)/);
+        const countM = report.match(/\*\*題數\*\*[：:]\s*(\d+)/);
+        qaScores = {
+          searchHitRate: hitM ? parseFloat(hitM[3]) : null,
+          answerRate: ansM ? parseFloat(ansM[3]) : null,
+          citationAccuracy: citM ? parseFloat(citM[3]) : null,
+          questionCount: countM ? parseInt(countM[1]) : null,
+          reportDate: dateM ? dateM[1].trim() : reportFiles[0].replace('assistant-report-', '').replace('.md', ''),
+        };
+      }
+    }
+  }
+
+  // 1b. Doc/Chunk counts
+  const docCount = new Set(metaIndex.map(m => m.doc_key)).size;
+  const chunkCount = metaIndex.length;
+
+  // 1c. GHG Metrics — extract from RPT-GHG-* reports
+  const ghgYears = [];
+  const rptDirs = fs.existsSync(docsPath)
+    ? fs.readdirSync(docsPath).filter(d => d.startsWith('RPT-GHG-')).sort()
+    : [];
+  for (const dir of rptDirs) {
+    const yearM = dir.match(/RPT-GHG-(\d{4})/);
+    if (!yearM) continue;
+    const year = parseInt(yearM[1]);
+    const metaPath = path.join(docsPath, dir, metadataFilename);
+    const metaYaml = readFileSafe(metaPath);
+    if (!metaYaml) continue;
+    const mainFile = metaYaml.match(/^\s+zh:\s*(.+)$/m);
+    if (!mainFile) continue;
+    const md = readFileSafe(path.join(docsPath, dir, mainFile[1].trim()));
+    if (!md) continue;
+
+    const totalM = md.match(/加總溫室氣體排放量為\s*\*\*([0-9,.]+)\s*tCO2e\*\*/);
+    const elecM = md.match(/用電總度數為\s*\*\*([0-9,.]+)度\*\*/);
+    // 各類別溫室氣體排放統計表 — row: | 溫室氣體排放（tCO2e） | cat1 | cat2 | total |
+    const catTableM = md.match(/各類別溫室氣體排放統計表[\s\S]*?\|\s*溫室氣體排放（tCO2e）\s*\|\s*([0-9,.]+)\s*\|\s*([0-9,.]+)\s*\|\s*([0-9,.]+)\s*\|/);
+    // 類別1與類別2排放源類型統計表 — row with fixed|mobile|fugitive|cat2|total
+    const srcTableM = md.match(/排放源類型統計表[\s\S]*?\|\s*溫室氣體排放（tCO2e）\s*\|\s*([0-9,.]+)\s*\|\s*([0-9,.]+)\s*\|\s*([0-9,.]+)\s*\|\s*([0-9,.]+)\s*\|\s*([0-9,.]+)\s*\|/);
+
+    const entry = {
+      year,
+      total_tCO2e: parseNumber(totalM?.[1]),
+      cat1_tCO2e: parseNumber(catTableM?.[1]),
+      cat2_tCO2e: parseNumber(catTableM?.[2]),
+      electricity_kWh: parseNumber(elecM?.[1]),
+    };
+    if (srcTableM) {
+      entry.breakdown = {
+        fixed: parseNumber(srcTableM[1]),
+        mobile: parseNumber(srcTableM[2]),
+        fugitive: parseNumber(srcTableM[3]),
+      };
+    }
+    ghgYears.push(entry);
+  }
+
+  // YoY change
+  let yoyChange = null;
+  if (ghgYears.length >= 2) {
+    const curr = ghgYears[ghgYears.length - 1];
+    const prev = ghgYears[ghgYears.length - 2];
+    if (curr.total_tCO2e && prev.total_tCO2e) {
+      yoyChange = {
+        total_pct: +((curr.total_tCO2e - prev.total_tCO2e) / prev.total_tCO2e * 100).toFixed(1),
+        electricity_pct: (curr.electricity_kWh && prev.electricity_kWh)
+          ? +((curr.electricity_kWh - prev.electricity_kWh) / prev.electricity_kWh * 100).toFixed(1)
+          : null,
+      };
+    }
+  }
+
+  // 1d. Review Timeline + 1e. Owner Workload — from merge.yaml
+  const reviewTimeline = [];
+  const ownerWorkload = {};
+  const typeCount = {};
+  if (fs.existsSync(docsPath)) {
+    for (const entry of fs.readdirSync(docsPath, { withFileTypes: true })) {
+      if (!entry.isDirectory() || entry.name.startsWith('_')) continue;
+      const my = readFileSafe(path.join(docsPath, entry.name, metadataFilename));
+      if (!my) continue;
+      const idM = my.match(/^document_id:\s*(.+)$/m);
+      const titleM = my.match(/^title_zh:\s*(.+)$/m);
+      const ownerM = my.match(/^owner:\s*(.+)$/m);
+      const typeM = my.match(/^type:\s*(.+)$/m);
+      const reviewM = my.match(/^next_review_date:\s*(.+)$/m);
+
+      const owner = ownerM ? ownerM[1].trim() : '未指定';
+      ownerWorkload[owner] = (ownerWorkload[owner] || 0) + 1;
+
+      const typ = typeM ? typeM[1].trim() : 'OTHER';
+      typeCount[typ] = (typeCount[typ] || 0) + 1;
+
+      if (reviewM && reviewM[1].trim() !== 'null') {
+        const reviewDate = new Date(reviewM[1].trim());
+        const daysUntil = Math.ceil((reviewDate - now) / 86400000);
+        reviewTimeline.push({
+          doc_id: idM ? idM[1].trim() : entry.name,
+          title: titleM ? titleM[1].trim() : entry.name,
+          owner,
+          next_review_date: reviewM[1].trim(),
+          daysUntil,
+        });
+      }
+    }
+  }
+  reviewTimeline.sort((a, b) => a.daysUntil - b.daysUntil);
+
+  // 1f. Milestones — parse milestones.yaml
+  const milestones = [];
+  const msPath = path.join(docsPath, 'MTX-TIMELINE', 'milestones.yaml');
+  const msContent = readFileSafe(msPath);
+  if (msContent) {
+    const blocks = msContent.split(/^\s+-\s+id:\s*/m).slice(1);
+    for (const block of blocks) {
+      const lines = ('id: ' + block).split('\n');
+      const get = (key) => {
+        const l = lines.find(l => l.trim().startsWith(key + ':'));
+        if (!l) return null;
+        const v = l.split(':').slice(1).join(':').trim();
+        return v === 'null' ? null : v;
+      };
+      milestones.push({
+        id: get('id'),
+        name: get('name'),
+        category: get('category'),
+        due_date: get('due_date'),
+        status: get('status') || 'pending',
+        owner: get('owner') || '',
+      });
+    }
+  }
+
+  // 1g. Collectors
+  const collectors = (config.collectors || []).map(c => ({
+    id: c.id,
+    enabled: c.enabled !== false,
+  }));
+
+  // 1h. Recent Changes — git log
+  let recentChanges = [];
+  try {
+    const log = execSync('git log --format="%ai|%s" -20 -- knowledge/', {
+      encoding: 'utf8',
+      cwd: PROJECT_ROOT,
+      timeout: 5000,
+    }).trim();
+    if (log) {
+      recentChanges = log.split('\n').map(line => {
+        const [date, ...msgParts] = line.split('|');
+        return { date: date.trim().slice(0, 16), message: msgParts.join('|').trim() };
+      });
+    }
+  } catch { /* no git available */ }
+
+  // 1i. GitHub info
+  let github = { owner: '', repo: '' };
+  try {
+    const remote = execSync('git remote get-url origin', { encoding: 'utf8', cwd: PROJECT_ROOT, timeout: 3000 }).trim();
+    const sshM = remote.match(/github\.com[:/]([^/]+)\/(.+?)(?:\.git)?$/);
+    if (sshM) github = { owner: sshM[1], repo: sshM[2] };
+  } catch { /* no git */ }
+
+  return {
+    buildTime: now.toISOString(),
+    qaScores,
+    docCount,
+    chunkCount,
+    typeCount,
+    ghgMetrics: { years: ghgYears, yoyChange },
+    reviewTimeline,
+    ownerWorkload,
+    milestones,
+    collectors,
+    recentChanges,
+    github,
+  };
+}
+
 /**
  * Main build function. Can be called programmatically or from CLI.
  * Outputs one HTML per profile: {outputDir}/{profileName}.html
@@ -845,6 +1054,11 @@ async function build(overrides = {}) {
       })};</script>`;
       template = template.replace('</head>', `${akoraJs}\n</head>`);
     }
+
+    // Inject dashboard data
+    const dashboardData = buildDashboardData(config, metaIndex, profileChunks);
+    const dashboardJs = `<script>window.__DASHBOARD__=${JSON.stringify(dashboardData)};</script>`;
+    template = template.replace('</head>', `${dashboardJs}\n</head>`);
 
     // Substitute UI/domain placeholders with profile overrides
     template = substitutePlaceholders(template, config, profile);

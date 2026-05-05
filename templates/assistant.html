@@ -140,14 +140,46 @@
       padding: 4px 0;
     }
 
+    .dashboard-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 4px;
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-pass);
+      background: oklch(0.48 0.16 150 / 0.08);
+      border: none;
+      border-left: 3px solid var(--color-pass);
+      cursor: pointer;
+      text-align: left;
+    }
+    .dashboard-btn:hover {
+      background: oklch(0.48 0.16 150 / 0.14);
+    }
+    .dashboard-btn.active {
+      background: oklch(0.48 0.16 150 / 0.18);
+      font-weight: 700;
+    }
+
     .doc-group-label {
-      padding: 6px 10px 3px;
+      padding: 8px 10px 4px;
       font-size: var(--text-xs);
       font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.03em;
+      border-left: 3px solid transparent;
     }
+    .doc-group-label[data-group="POL"] { color: oklch(0.50 0.17 300); border-left-color: oklch(0.50 0.17 300); }
+    .doc-group-label[data-group="PRO"] { color: oklch(0.48 0.15 250); border-left-color: oklch(0.48 0.15 250); }
+    .doc-group-label[data-group="FRM"] { color: oklch(0.48 0.16 150); border-left-color: oklch(0.48 0.16 150); }
+    .doc-group-label[data-group="RPT"] { color: oklch(0.55 0.16 55); border-left-color: oklch(0.55 0.16 55); }
+    .doc-group-label[data-group="STD"] { color: oklch(0.48 0.10 200); border-left-color: oklch(0.48 0.10 200); }
+    .doc-group-label[data-group="PLN"] { color: oklch(0.52 0.14 80); border-left-color: oklch(0.52 0.14 80); }
+    .doc-group-label[data-group="MTX"] { color: oklch(0.52 0.17 340); border-left-color: oklch(0.52 0.17 340); }
+    .doc-group-label[data-group="GDL"] { color: oklch(0.45 0.01 250); border-left-color: oklch(0.45 0.01 250); }
+    .doc-group-label[data-group="REG"] { color: oklch(0.48 0.15 280); border-left-color: oklch(0.48 0.15 280); }
 
     .doc-item {
       display: block;
@@ -175,12 +207,12 @@
     }
     .doc-item-id {
       display: inline-block;
-      font-size: var(--text-xs);
-      font-weight: 700;
+      font-size: 0.85em;
+      font-weight: 400;
       color: var(--text-muted);
-      margin-right: 2px;
+      margin-left: 4px;
     }
-    .doc-item.active .doc-item-id { color: var(--color-blue); }
+    .doc-item.active .doc-item-id { color: oklch(0.48 0.15 250 / 0.7); }
     .doc-item-source {
       display: inline-block;
       font-size: 10px;
@@ -860,12 +892,20 @@ function renderDocNav(filter) {
 
   nav.innerHTML = '';
 
+  // Dashboard button at top
+  const dashBtn = document.createElement('button');
+  dashBtn.className = 'dashboard-btn' + (state.currentDocKey === '__dashboard__' ? ' active' : '');
+  dashBtn.innerHTML = '<span>📊</span> 最新概況';
+  dashBtn.addEventListener('click', () => showDashboard());
+  nav.appendChild(dashBtn);
+
   for (const groupKey of groupOrder) {
     const items = groups[groupKey];
     if (items.length === 0) continue;
 
     const label = document.createElement('div');
     label.className = 'doc-group-label';
+    label.dataset.group = groupKey;
     label.textContent = DOC_GROUP_LABELS[groupKey] || groupKey;
     nav.appendChild(label);
 
@@ -874,14 +914,14 @@ function renderDocNav(filter) {
       btn.className = 'doc-item' + (state.currentDocKey === doc.doc_key ? ' active' : '');
       const id = doc.doc_id || '';
       const title = doc.title || doc.doc_key;
-      const ver = doc.version ? ` v${doc.version}` : '';
+      const ver = doc.version ? `v${doc.version}` : '';
       const sourceTag = doc.doc_key.startsWith('external/')
         ? `<span class="doc-item-source">${doc.doc_key.split('/')[1]}</span> `
         : '';
       btn.innerHTML = id
-        ? `${sourceTag}<span class="doc-item-id">${id}</span> ${title}<span class="doc-item-ver">${ver}</span>`
+        ? `${sourceTag}${title}<span class="doc-item-ver">${ver}</span> <span class="doc-item-id">${id}</span>`
         : `${sourceTag}${title}`;
-      btn.title = `${id} ${title}${ver}`;
+      btn.title = `${title} ${id}${ver ? ' ' + ver : ''}`;
       btn.dataset.docKey = doc.doc_key;
       btn.addEventListener('click', () => showDocument(doc.doc_key, null));
       nav.appendChild(btn);
@@ -921,10 +961,249 @@ function findDocByKey(key) {
 // ============================================================
 // DOCUMENT VIEWER
 // ============================================================
+function showDashboard() {
+  const iframe = document.getElementById('doc-iframe');
+  const placeholder = document.getElementById('doc-placeholder');
+  const centerTitle = document.getElementById('center-title');
+
+  state.currentDocKey = '__dashboard__';
+  document.querySelectorAll('.doc-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.dashboard-btn').forEach(el => el.classList.add('active'));
+  centerTitle.textContent = '最新概況';
+
+  const D = window.__DASHBOARD__ || {};
+  const ghg = D.ghgMetrics || {};
+  const latest = (ghg.years || []).slice(-1)[0] || {};
+  const yoy = ghg.yoyChange || {};
+
+  // --- SVG donut chart ---
+  function donutSVG(segments) {
+    const C = 314.16; // circumference = 2*PI*50
+    const total = segments.reduce((s, seg) => s + seg.value, 0);
+    if (!total) return '';
+    let offset = 0;
+    const paths = segments.map(seg => {
+      const len = (seg.value / total) * C;
+      const el = `<circle cx="60" cy="60" r="50" fill="none" stroke="${seg.color}" stroke-width="18" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-offset}" transform="rotate(-90 60 60)"/>`;
+      offset += len;
+      return el;
+    });
+    return `<svg viewBox="0 0 120 120" width="180" height="180">${paths.join('')}</svg>`;
+  }
+
+  const donutSegments = [];
+  if (latest.breakdown) {
+    donutSegments.push({ value: latest.breakdown.fixed, color: '#1e5ab8', label: '固定源' });
+    donutSegments.push({ value: latest.breakdown.mobile, color: '#1e7a8a', label: '移動源' });
+    donutSegments.push({ value: latest.breakdown.fugitive, color: '#7830b8', label: '逸散源' });
+  }
+  if (latest.cat2_tCO2e) donutSegments.push({ value: latest.cat2_tCO2e, color: '#8a7020', label: '外購電力' });
+  const donut = donutSVG(donutSegments);
+  const legend = donutSegments.map(s => `<span style="display:inline-flex;align-items:center;gap:4px;margin-right:12px;"><span style="width:10px;height:10px;border-radius:50%;background:${s.color};display:inline-block;"></span>${s.label}</span>`).join('');
+
+  // --- Owner bar chart ---
+  const owners = Object.entries(D.ownerWorkload || {}).sort((a,b) => b[1]-a[1]);
+  const maxOwner = owners[0]?.[1] || 1;
+  const ownerBars = owners.map(([name, count]) =>
+    `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="min-width:80px;font-size:13px;">${name}</span><div style="flex:1;height:18px;background:#dfe0e5;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${(count/maxOwner*100).toFixed(0)}%;background:#1e5ab8;border-radius:3px;"></div></div><span style="font-size:12px;color:#5e6070;min-width:20px;">${count}</span></div>`
+  ).join('');
+
+  // --- Type breakdown ---
+  const typeRows = Object.entries(D.typeCount || {}).sort((a,b) => b[1]-a[1])
+    .map(([t, n]) => `<span style="display:inline-block;background:#ecedf0;padding:2px 8px;border-radius:4px;margin:2px;font-size:12px;"><b>${DOC_GROUP_LABELS[t]||t}</b> ${n}</span>`).join('');
+
+  // --- Review timeline ---
+  const reviewItems = (D.reviewTimeline || []).slice(0, 10).map(r => {
+    const color = r.daysUntil < 30 ? '#c93135' : r.daysUntil < 90 ? '#8a7020' : '#1e8050';
+    const badge = r.daysUntil < 0 ? '逾期' : `${r.daysUntil}天`;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #ecedf0;"><span style="font-size:13px;">${r.title}</span><span style="font-size:11px;padding:2px 6px;border-radius:3px;background:${color}20;color:${color};font-weight:600;">${badge}</span></div>`;
+  }).join('');
+
+  // --- Milestones ---
+  const msRows = (D.milestones || []).map(m => {
+    const dateStr = m.due_date || '依排程';
+    const statusColor = m.status === 'completed' ? '#1e8050' : '#8a7020';
+    const statusLabel = m.status === 'completed' ? '完成' : '待辦';
+    return `<tr><td style="font-size:12px;">${m.category}</td><td style="font-size:13px;">${m.name}</td><td style="font-size:12px;">${dateStr}</td><td><span style="font-size:11px;padding:1px 6px;border-radius:3px;background:${statusColor}18;color:${statusColor};">${statusLabel}</span></td></tr>`;
+  }).join('');
+
+  // --- Collectors ---
+  const collectorItems = (D.collectors || []).map(c =>
+    `<span style="display:inline-block;margin-right:12px;font-size:13px;">${c.enabled ? '✅' : '⏸'} ${c.id}</span>`
+  ).join('');
+
+  // --- Activity feed ---
+  const changeItems = (D.recentChanges || []).slice(0, 12).map(c =>
+    `<div style="padding:3px 0;border-bottom:1px solid #f0f0f2;font-size:12px;"><span style="color:#8a8c98;">${c.date.slice(5,10)}</span> ${c.message.slice(0,50)}${c.message.length>50?'…':''}</div>`
+  ).join('');
+
+  // --- QA scores ---
+  const qa = D.qaScores;
+  const qaHtml = qa
+    ? `<div style="display:flex;gap:12px;"><div><div style="font-size:1.8rem;font-weight:700;color:#1e8050;">${qa.searchHitRate}%</div><div style="font-size:11px;color:#5e6070;">搜尋命中</div></div><div><div style="font-size:1.8rem;font-weight:700;color:#1e8050;">${qa.answerRate}%</div><div style="font-size:11px;color:#5e6070;">有效回答</div></div><div><div style="font-size:1.8rem;font-weight:700;color:#1e8050;">${qa.citationAccuracy}%</div><div style="font-size:11px;color:#5e6070;">引文正確</div></div></div><div style="font-size:11px;color:#8a8c98;margin-top:4px;">${qa.questionCount} 題 · ${qa.reportDate}</div>`
+    : '<div style="color:#8a8c98;font-size:13px;">尚未產生</div>';
+
+  // --- YoY arrow ---
+  const yoyArrow = yoy.total_pct != null
+    ? `<span style="font-size:14px;color:${yoy.total_pct > 0 ? '#c93135' : '#1e8050'};">${yoy.total_pct > 0 ? '▲' : '▼'} ${Math.abs(yoy.total_pct)}%</span>`
+    : '';
+  const elecArrow = yoy.electricity_pct != null
+    ? `<span style="font-size:12px;color:${yoy.electricity_pct > 0 ? '#c93135' : '#1e8050'};">${yoy.electricity_pct > 0 ? '▲' : '▼'} ${Math.abs(yoy.electricity_pct)}%</span>`
+    : '';
+
+  const fmt = (n) => n != null ? n.toLocaleString('en-US', {maximumFractionDigits:1}) : 'N/A';
+
+  const dashHtml = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:1.5rem;background:#f5f6f8;color:#1e2030;line-height:1.5;}
+    .grid{display:grid;gap:1rem;}
+    .grid-4{grid-template-columns:repeat(4,1fr);}
+    .grid-2{grid-template-columns:1fr 1fr;}
+    .card{background:#fff;border-radius:8px;padding:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+    .card-header{font-size:12px;font-weight:600;color:#5e6070;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.03em;}
+    .big-num{font-size:2rem;font-weight:700;}
+    .sub{font-size:12px;color:#8a8c98;margin-top:2px;}
+    h2{font-size:14px;font-weight:700;color:#5e6070;margin:1.5rem 0 0.8rem;padding-bottom:4px;border-bottom:1px solid #ecedf0;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th{background:#f5f6f8;padding:6px 8px;text-align:left;font-weight:600;font-size:11px;color:#5e6070;}
+    td{padding:6px 8px;border-top:1px solid #f0f0f2;}
+    @media(max-width:900px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-2{grid-template-columns:1fr;}}
+  </style></head><body>
+
+  <!-- Section 1: Status Cards -->
+  <div class="grid grid-4" style="margin-bottom:1rem;">
+    <div class="card"><div class="card-header">CI 狀態</div><div id="ci-status" style="font-size:13px;color:#8a8c98;">Loading...</div></div>
+    <div class="card"><div class="card-header">QA 品質</div>${qaHtml}</div>
+    <div class="card"><div class="card-header">知識庫</div><div class="big-num" style="color:#1e5ab8;">${D.docCount || 0}</div><div class="sub">${D.chunkCount || 0} 搜尋區塊 · ${Object.keys(D.typeCount||{}).length} 分類</div><div style="margin-top:6px;">${typeRows}</div></div>
+    <div class="card"><div class="card-header">最後發布</div><div id="last-publish" style="font-size:13px;color:#8a8c98;">Loading...</div></div>
+  </div>
+
+  <!-- Section 2: ESG Core Metrics -->
+  <h2>碳排放追蹤</h2>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-header">${latest.year || '—'} 年度排放</div>
+      <div style="display:flex;align-items:baseline;gap:8px;"><span class="big-num" style="color:#1e8050;">${fmt(latest.total_tCO2e)}</span><span style="font-size:14px;color:#5e6070;">tCO2e</span>${yoyArrow}</div>
+      <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><div style="font-size:11px;color:#8a8c98;">類別1（直接）</div><div style="font-size:1.1rem;font-weight:600;">${fmt(latest.cat1_tCO2e)}</div></div>
+        <div><div style="font-size:11px;color:#8a8c98;">類別2（間接）</div><div style="font-size:1.1rem;font-weight:600;">${fmt(latest.cat2_tCO2e)}</div></div>
+        <div><div style="font-size:11px;color:#8a8c98;">用電量</div><div style="font-size:1.1rem;font-weight:600;">${latest.electricity_kWh ? (latest.electricity_kWh/1e6).toFixed(2)+'M 度' : 'N/A'} ${elecArrow}</div></div>
+      </div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div class="card-header" style="align-self:flex-start;">排放源分佈</div>
+      ${donut}
+      <div style="margin-top:8px;font-size:12px;">${legend}</div>
+    </div>
+  </div>
+
+  <!-- Section 3: Management Board -->
+  <h2>管理看板</h2>
+  <div class="grid grid-2">
+    <div class="card"><div class="card-header">審查到期</div>${reviewItems || '<div style="color:#8a8c98;font-size:13px;">無到期文件</div>'}</div>
+    <div class="card"><div class="card-header">負責人工作量</div>${ownerBars}</div>
+  </div>
+  <div class="grid grid-2" style="margin-top:1rem;">
+    <div class="card"><div class="card-header">里程碑</div>
+      <table><thead><tr><th>類別</th><th>名稱</th><th>期限</th><th>狀態</th></tr></thead><tbody>${msRows || '<tr><td colspan="4" style="color:#8a8c98;">無里程碑資料</td></tr>'}</tbody></table>
+    </div>
+    <div class="card"><div class="card-header">收集器</div><div style="margin-top:4px;">${collectorItems || '無'}</div></div>
+  </div>
+
+  <!-- Section 4: Activity Feed -->
+  <h2>動態消息</h2>
+  <div class="grid grid-2">
+    <div class="card"><div class="card-header">最近文件異動</div>${changeItems || '<div style="color:#8a8c98;">無異動紀錄</div>'}</div>
+    <div class="card"><div class="card-header">GitHub</div><div id="gh-issues" style="font-size:13px;color:#8a8c98;">Loading...</div><div id="gh-runs" style="margin-top:8px;font-size:13px;color:#8a8c98;"></div></div>
+  </div>
+
+  <!-- Section 5: Timeline -->
+  <h2>ESG 時程</h2>
+  <div class="card">
+    ${(D.milestones||[]).filter(m=>m.due_date).sort((a,b)=>a.due_date.localeCompare(b.due_date)).map(m =>
+      `<div style="display:flex;gap:12px;padding:4px 0;border-bottom:1px solid #f0f0f2;font-size:13px;"><span style="min-width:70px;color:#8a8c98;">${m.due_date}</span><span style="min-width:80px;color:#7830b8;font-weight:600;">${m.category}</span><span>${m.name}</span></div>`
+    ).join('') || '<div style="color:#8a8c98;">無時程資料</div>'}
+  </div>
+
+  <div style="margin-top:1.5rem;font-size:11px;color:#8a8c98;">建置時間：${D.buildTime ? new Date(D.buildTime).toLocaleString('zh-TW') : '—'}</div>
+
+  <script>
+  (function(){
+    const GH_OWNER = '${D.github?.owner || ''}';
+    const GH_REPO = '${D.github?.repo || ''}';
+    if (!GH_OWNER || !GH_REPO) return;
+
+    const CACHE_KEY = 'esg_dash_gh';
+    const CACHE_TTL = 300000;
+
+    async function fetchGH(ep) {
+      try {
+        const cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+        if (cache[ep] && Date.now() - cache[ep].ts < CACHE_TTL) return cache[ep].data;
+        const r = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + ep);
+        if (!r.ok) return null;
+        const data = await r.json();
+        cache[ep] = { data, ts: Date.now() };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+        return data;
+      } catch { return null; }
+    }
+
+    function relTime(iso) {
+      const d = (Date.now() - new Date(iso).getTime()) / 1000;
+      if (d < 60) return '剛才';
+      if (d < 3600) return Math.floor(d/60) + ' 分鐘前';
+      if (d < 86400) return Math.floor(d/3600) + ' 小時前';
+      return Math.floor(d/86400) + ' 天前';
+    }
+
+    (async () => {
+      // CI Runs
+      const runs = await fetchGH('/actions/runs?per_page=6');
+      const ciEl = document.getElementById('ci-status');
+      if (runs && runs.workflow_runs) {
+        const byName = {};
+        for (const r of runs.workflow_runs) {
+          if (!byName[r.name]) byName[r.name] = r;
+        }
+        ciEl.innerHTML = Object.values(byName).map(r => {
+          const icon = r.conclusion === 'success' ? '✅' : r.conclusion === 'failure' ? '❌' : '⏳';
+          return '<div style="margin-bottom:3px;">' + icon + ' ' + r.name + ' <span style="color:#8a8c98;font-size:11px;">' + relTime(r.updated_at) + '</span></div>';
+        }).join('');
+      } else { ciEl.textContent = '無法取得'; }
+
+      // Last publish (audit branch)
+      const commits = await fetchGH('/commits?sha=audit&per_page=1');
+      const pubEl = document.getElementById('last-publish');
+      if (commits && commits[0]) {
+        pubEl.innerHTML = '<div style="font-size:1.2rem;font-weight:600;">' + relTime(commits[0].commit.committer.date) + '</div><div style="font-size:11px;color:#8a8c98;">' + commits[0].sha.slice(0,7) + '</div>';
+      } else { pubEl.textContent = '無 audit 分支'; }
+
+      // Issues
+      const issues = await fetchGH('/issues?state=open&per_page=5');
+      const issEl = document.getElementById('gh-issues');
+      if (issues && issues.length > 0) {
+        issEl.innerHTML = '<div style="font-size:11px;font-weight:600;color:#5e6070;margin-bottom:4px;">Open Issues</div>' + issues.filter(i=>!i.pull_request).slice(0,5).map(i =>
+          '<div style="margin-bottom:3px;font-size:12px;"><a href="'+i.html_url+'" target="_blank" style="color:#1e5ab8;text-decoration:none;">#'+i.number+'</a> '+i.title.slice(0,40)+'</div>'
+        ).join('');
+      } else { issEl.textContent = '無 Open Issues'; }
+    })();
+  })();
+  </script>
+  </body></html>`;
+
+  placeholder.style.display = 'none';
+  iframe.style.display = 'block';
+  iframe.srcdoc = dashHtml;
+}
+
 function showDocument(docKey, sectionId) {
   const iframe = document.getElementById('doc-iframe');
   const placeholder = document.getElementById('doc-placeholder');
   const centerTitle = document.getElementById('center-title');
+
+  // Clear dashboard active state
+  document.querySelectorAll('.dashboard-btn').forEach(el => el.classList.remove('active'));
 
   // Look up document with prefix matching
   const found = findDocByKey(docKey);

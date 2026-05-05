@@ -1,0 +1,12 @@
+document_id: REG-OHS-COMMITTEE
+type: REG
+title_zh: 職業安全衛生委員會會議紀錄
+title_en: OHS Committee Meeting Minutes
+main:
+  zh: 職業安全衛生委員會會議紀錄.md
+status: active
+owner: 環安衛室
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+references:
+  - PRO-OHS

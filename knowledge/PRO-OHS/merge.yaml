@@ -1,0 +1,14 @@
+document_id: PRO-OHS
+type: PRO
+title_zh: 職業安全衛生管理程序書
+title_en: Occupational Health and Safety Procedure
+main:
+  zh: 職業安全衛生管理程序書.md
+status: active
+owner: 環安衛室
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+parent_policy: POL-ESG
+references:
+  - FRM-INCIDENT
+  - REG-OHS-COMMITTEE

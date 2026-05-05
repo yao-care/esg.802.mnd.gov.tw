@@ -1,0 +1,43 @@
+document_id: FRM-SATISFACTION
+type: FRM
+title_zh: 病患滿意度調查表
+title_en: Patient Satisfaction Survey Form
+main:
+  zh: 病患滿意度調查表.md
+status: active
+owner: 社工室
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+fields:
+  - name: survey_date
+    label: 調查日期
+    type: date
+    required: true
+  - name: department
+    label: 就醫科別
+    type: text
+    required: false
+  - name: overall_rating
+    label: 整體滿意度
+    type: select
+    options: ["5-非常滿意", "4-滿意", "3-普通", "2-不滿意", "1-非常不滿意"]
+    required: true
+  - name: cleanliness
+    label: 環境清潔
+    type: select
+    options: ["5", "4", "3", "2", "1"]
+    required: true
+  - name: staff_attitude
+    label: 人員態度
+    type: select
+    options: ["5", "4", "3", "2", "1"]
+    required: true
+  - name: wait_time
+    label: 等候時間
+    type: select
+    options: ["5", "4", "3", "2", "1"]
+    required: true
+  - name: comments
+    label: 其他意見
+    type: textarea
+    required: false

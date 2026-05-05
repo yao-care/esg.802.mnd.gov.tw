@@ -1,0 +1,12 @@
+document_id: RPT-SELF-EVAL
+type: RPT
+title_zh: 醫院自我評鑑報告
+title_en: Hospital Self-Evaluation Report
+main:
+  zh: 醫院自我評鑑報告.md
+status: active
+owner: 醫教部
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+references:
+  - STD-ACCRED

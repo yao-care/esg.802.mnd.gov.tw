@@ -1,1 +1,352 @@
-[]
+[
+  {
+    "id": 1,
+    "question": "哪些建築物納入溫室氣體盤查邊界？",
+    "expected_doc_key": "RPT-GHG-2025",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 2,
+    "question": "冷媒逸散量的計算公式是什麼？",
+    "expected_doc_key": "GDL-CALC-METHOD",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 3,
+    "question": "2025 年類別 2 間接排放佔總排放量的比例？",
+    "expected_doc_key": "RPT-GHG-2025",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 4,
+    "question": "柴油的 CO2 排放係數是多少？引用來源為何？",
+    "expected_doc_key": "GDL-CALC-METHOD",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 5,
+    "question": "ESG 委員會的成員組成與各單位執掌？",
+    "expected_doc_key": "PRO-ESG-COMMITTEE",
+    "identity": "ESG委員會",
+    "category": "G1-ESG治理"
+  },
+  {
+    "id": 6,
+    "question": "職災事件通報流程是什麼？",
+    "expected_doc_key": "PRO-OHS",
+    "identity": "環安衛人員",
+    "category": "S2-職業安全"
+  },
+  {
+    "id": 7,
+    "question": "溫盤 S1 查證的預定日期是什麼時候？",
+    "expected_doc_key": "MTX-TIMELINE",
+    "identity": "ESG委員會",
+    "category": "G3-時程管制"
+  },
+  {
+    "id": 8,
+    "question": "醫療廢棄物的分類標準是什麼？",
+    "expected_doc_key": "PRO-WASTE",
+    "identity": "環安衛人員",
+    "category": "E3-廢棄物"
+  },
+  {
+    "id": 9,
+    "question": "新建大樓的 ESG 規劃要點有哪些？",
+    "expected_doc_key": "PLN-CONSTRUCTION",
+    "identity": "設施管理員",
+    "category": "G2-建案管理"
+  },
+  {
+    "id": 10,
+    "question": "利害關係人鑑別採用哪些評分準則？",
+    "expected_doc_key": "MTX-STAKEHOLDER",
+    "identity": "ESG委員會",
+    "category": "G1-ESG治理"
+  },
+  {
+    "id": 11,
+    "question": "2025 年溫室氣體盤查報告書共有幾個版次？各版本修訂說明為何？",
+    "expected_doc_key": "RPT-GHG-2025",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 12,
+    "question": "2025 年類別 1 直接排放總量為多少 tCO2e？其中逸散源佔多少比例？",
+    "expected_doc_key": "RPT-GHG-2025",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 13,
+    "question": "屏東分院是否納入本院溫室氣體盤查邊界？排除原因為何？",
+    "expected_doc_key": "RPT-GHG-2025",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 14,
+    "question": "2025 年冷媒逸散量大幅增加的主因是什麼？較 2024 年增加幅度為何？",
+    "expected_doc_key": "MTX-EMISSION",
+    "identity": "設施管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 15,
+    "question": "麻醉氣體 Sevoflurane 的 GWP 值為多少？數據來源為何？",
+    "expected_doc_key": "GDL-CALC-METHOD",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 16,
+    "question": "2025 年盤查使用的電力排碳係數為多少 kgCO2e/度？係數公告機關為何？",
+    "expected_doc_key": "RPT-GHG-2025",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 17,
+    "question": "溫室氣體盤查作業採用哪種組織邊界設定方法？",
+    "expected_doc_key": "PRO-GHG-INV",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 18,
+    "question": "各業務單位月報數據的提交截止日期（燃料類與電力類分別）為何？",
+    "expected_doc_key": "PRO-GHG-INV",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 19,
+    "question": "車用尿素水解的排放量如何計算？計算中假設的尿素濃度為多少？",
+    "expected_doc_key": "GDL-CALC-METHOD",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 20,
+    "question": "哪些冷媒因非管制溫室氣體或 IPCC 未公告 GWP 值而不納入量化計算？",
+    "expected_doc_key": "MTX-EMISSION",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 21,
+    "question": "2025 年外購電力淨用電量為多少度？排除電量（租用單位及721營站）為多少度？",
+    "expected_doc_key": "RPT-GHG-2025",
+    "identity": "碳盤查管理員",
+    "category": "E1-碳盤查"
+  },
+  {
+    "id": 22,
+    "question": "節能減碳行動計畫的三大聚焦領域是什麼？",
+    "expected_doc_key": "PLN-ENERGY",
+    "identity": "設施管理員",
+    "category": "E2-能源管理"
+  },
+  {
+    "id": 23,
+    "question": "LED 汰換第一批的優先區域及目標完成時間為何？",
+    "expected_doc_key": "PLN-ENERGY",
+    "identity": "設施管理員",
+    "category": "E2-能源管理"
+  },
+  {
+    "id": 24,
+    "question": "月度用電監測發現差異超過多少百分比須說明原因？",
+    "expected_doc_key": "PLN-ENERGY",
+    "identity": "設施管理員",
+    "category": "E2-能源管理"
+  },
+  {
+    "id": 25,
+    "question": "2025 年本院年度淨用電量基準值為多少度？",
+    "expected_doc_key": "PLN-ENERGY",
+    "identity": "設施管理員",
+    "category": "E2-能源管理"
+  },
+  {
+    "id": 26,
+    "question": "廢棄物管理相關法規摘要的文件編號為何？",
+    "expected_doc_key": "STD-WASTE-REG",
+    "identity": "環安衛人員",
+    "category": "E3-廢棄物"
+  },
+  {
+    "id": 27,
+    "question": "廢棄物月報表的填報單位及所依據的程序書為何？",
+    "expected_doc_key": "PRO-WASTE",
+    "identity": "環安衛人員",
+    "category": "E3-廢棄物"
+  },
+  {
+    "id": 28,
+    "question": "水資源使用月報表由哪個單位負責每月填報？",
+    "expected_doc_key": "PRO-WATER",
+    "identity": "設施管理員",
+    "category": "E4-水資源"
+  },
+  {
+    "id": 29,
+    "question": "廢水水質監測的執行頻率與主要負責單位為何？",
+    "expected_doc_key": "PLN-ANNUAL",
+    "identity": "環安衛人員",
+    "category": "E4-水資源"
+  },
+  {
+    "id": 30,
+    "question": "新建設施規劃省水設備時應選用何種認證標準的設備？",
+    "expected_doc_key": "PLN-CONSTRUCTION",
+    "identity": "設施管理員",
+    "category": "E4-水資源"
+  },
+  {
+    "id": 31,
+    "question": "衛生福利部對本院的影響程度與關注程度各為何？醫院評鑑週期約幾年？",
+    "expected_doc_key": "MTX-STAKEHOLDER",
+    "identity": "ESG委員會",
+    "category": "S1-醫院評鑑"
+  },
+  {
+    "id": 32,
+    "question": "內部模擬評鑑演練的每年最低執行次數及 KPI 要求為何？",
+    "expected_doc_key": "PLN-ANNUAL",
+    "identity": "ESG委員會",
+    "category": "S1-醫院評鑑"
+  },
+  {
+    "id": 33,
+    "question": "醫院評鑑自評報告的文件編號為何？由哪個單位負責撰寫？",
+    "expected_doc_key": "RPT-SELF-EVAL",
+    "identity": "ESG委員會",
+    "category": "S1-醫院評鑑"
+  },
+  {
+    "id": 34,
+    "question": "針扎或血液體液暴露事件需在幾小時內通報環安衛室？",
+    "expected_doc_key": "PRO-OHS",
+    "identity": "環安衛人員",
+    "category": "S2-職業安全"
+  },
+  {
+    "id": 35,
+    "question": "職業安全衛生委員會的召開頻率與秘書單位為何？",
+    "expected_doc_key": "REG-OHS-COMMITTEE",
+    "identity": "環安衛人員",
+    "category": "S2-職業安全"
+  },
+  {
+    "id": 36,
+    "question": "職安衛教育訓練完訓率的年度 KPI 目標值為多少？",
+    "expected_doc_key": "PRO-OHS",
+    "identity": "環安衛人員",
+    "category": "S2-職業安全"
+  },
+  {
+    "id": 37,
+    "question": "社區衛教活動每年至少舉辦幾次？由哪個單位負責規劃執行？",
+    "expected_doc_key": "PLN-ANNUAL",
+    "identity": "ESG委員會",
+    "category": "S3-社會參與"
+  },
+  {
+    "id": 38,
+    "question": "社區醫療服務報告的文件編號為何？預計在哪一季完成更新？",
+    "expected_doc_key": "RPT-COMMUNITY",
+    "identity": "ESG委員會",
+    "category": "S3-社會參與"
+  },
+  {
+    "id": 39,
+    "question": "病患及家屬被列為哪個優先等級的利害關係人？病患滿意度問卷的彙整頻率為何？",
+    "expected_doc_key": "MTX-STAKEHOLDER",
+    "identity": "ESG委員會",
+    "category": "S3-社會參與"
+  },
+  {
+    "id": 40,
+    "question": "ESG 政策的違規通報後，初步調查需在幾個工作日內完成？",
+    "expected_doc_key": "POL-ESG",
+    "identity": "ESG委員會",
+    "category": "G1-ESG治理"
+  },
+  {
+    "id": 41,
+    "question": "氣候風險評估矩陣採用哪個框架？實體風險分為哪兩大類？",
+    "expected_doc_key": "MTX-RISK-CLIMATE",
+    "identity": "ESG委員會",
+    "category": "G1-ESG治理"
+  },
+  {
+    "id": 42,
+    "question": "年度 ESG 報告須於幾月幾日前發行？",
+    "expected_doc_key": "MTX-TIMELINE",
+    "identity": "ESG委員會",
+    "category": "G1-ESG治理"
+  },
+  {
+    "id": 43,
+    "question": "重大建案（預算超過多少元）啟動前須先完成 ESG 評估並取得委員會核准？",
+    "expected_doc_key": "PLN-CONSTRUCTION",
+    "identity": "設施管理員",
+    "category": "G2-建案管理"
+  },
+  {
+    "id": 44,
+    "question": "新建或整修工程超過多少平方公尺時需評估申請 EEWH 綠建築標章？",
+    "expected_doc_key": "PLN-CONSTRUCTION",
+    "identity": "設施管理員",
+    "category": "G2-建案管理"
+  },
+  {
+    "id": 45,
+    "question": "施工期間工地安全巡查的最低頻率要求為何？",
+    "expected_doc_key": "PLN-CONSTRUCTION",
+    "identity": "設施管理員",
+    "category": "G2-建案管理"
+  },
+  {
+    "id": 46,
+    "question": "ESG 月度進度回報表（FRM-PROGRESS）由哪些單位填報？彙整後提供給誰？",
+    "expected_doc_key": "FRM-PROGRESS",
+    "identity": "ESG委員會",
+    "category": "G3-時程管制"
+  },
+  {
+    "id": 47,
+    "question": "2027 年溫盤報告書定版（GHG-FINAL）的預定完成日期為何？",
+    "expected_doc_key": "MTX-TIMELINE",
+    "identity": "碳盤查管理員",
+    "category": "G3-時程管制"
+  },
+  {
+    "id": 48,
+    "question": "關鍵時程總表的更新頻率與維護責任單位為何？",
+    "expected_doc_key": "MTX-TIMELINE",
+    "identity": "ESG委員會",
+    "category": "G3-時程管制"
+  },
+  {
+    "id": 49,
+    "question": "環境部溫盤申報系統登錄的 KPI 時效要求（依法按時申報）由哪份計畫文件規範？",
+    "expected_doc_key": "PLN-ANNUAL",
+    "identity": "碳盤查管理員",
+    "category": "G3-時程管制"
+  },
+  {
+    "id": 50,
+    "question": "2026 年 Q2 節能計畫的兩項預期完成事項是什麼？",
+    "expected_doc_key": "PLN-ENERGY",
+    "identity": "設施管理員",
+    "category": "G3-時程管制"
+  }
+]

@@ -1,0 +1,14 @@
+document_id: MTX-TIMELINE
+type: MTX
+title_zh: 關鍵時程總表
+title_en: Master Timeline Matrix
+main:
+  zh: 關鍵時程總表.md
+status: active
+owner: 永續發展室
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+references:
+  - PLN-ANNUAL
+  - PRO-ESG-COMMITTEE
+  - PRO-GHG-INV

@@ -1,0 +1,16 @@
+document_id: POL-ESG
+type: POL
+title_zh: ESG 永續發展政策
+title_en: ESG Sustainability Policy
+main:
+  zh: ESG永續發展政策.md
+status: active
+owner: 院長室
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+references:
+  - PRO-ESG-COMMITTEE
+  - PRO-GHG-INV
+  - PRO-OHS
+  - PRO-WASTE
+  - PRO-WATER

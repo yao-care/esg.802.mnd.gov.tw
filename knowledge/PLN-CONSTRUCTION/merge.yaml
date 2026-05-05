@@ -1,0 +1,16 @@
+document_id: PLN-CONSTRUCTION
+type: PLN
+title_zh: 建案 ESG 規劃書
+title_en: Construction ESG Planning Document
+main:
+  zh: 建案ESG規劃書.md
+status: active
+owner: 工程室
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+parent_policy: POL-ESG
+references:
+  - GDL-GREEN-BUILD
+  - FRM-MILESTONE
+  - MTX-RISK-CLIMATE
+  - PRO-GHG-INV

@@ -1,0 +1,16 @@
+document_id: PRO-ESG-COMMITTEE
+type: PRO
+title_zh: ESG 委員會運作程序書
+title_en: ESG Committee Operating Procedure
+main:
+  zh: ESG委員會運作程序書.md
+status: active
+owner: 永續發展室
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+parent_policy: POL-ESG
+references:
+  - MTX-STAKEHOLDER
+  - MTX-RISK-CLIMATE
+  - PLN-ANNUAL
+  - MTX-TIMELINE

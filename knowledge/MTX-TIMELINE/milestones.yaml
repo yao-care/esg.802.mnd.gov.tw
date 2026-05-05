@@ -1,0 +1,55 @@
+milestones:
+  - id: GHG-DATA-CLOSE
+    name: 溫盤數據截止
+    category: E1-碳盤查
+    due_date: 2027-01-15
+    status: pending
+    owner: 永續發展室
+  - id: GHG-S1
+    name: 溫盤 S1 查證
+    category: E1-碳盤查
+    due_date: 2027-01-31
+    status: pending
+    owner: 永續發展室
+  - id: GHG-S2
+    name: 溫盤 S2 查證
+    category: E1-碳盤查
+    due_date: 2027-02-28
+    status: pending
+    owner: 永續發展室
+  - id: GHG-FINAL
+    name: 溫盤報告定版
+    category: E1-碳盤查
+    due_date: 2027-03-15
+    status: pending
+    owner: 永續發展室
+  - id: ENERGY-REVIEW
+    name: 節能成效檢討
+    category: E2-能源管理
+    due_date: 2027-06-30
+    status: pending
+    owner: 工程室
+  - id: ACCRED-SUBMIT
+    name: 評鑑資料送件
+    category: S1-醫院評鑑
+    due_date: null
+    status: pending
+    owner: 醫教部
+  - id: ESG-ANNUAL-REPORT
+    name: ESG年度報告
+    category: G1-ESG治理
+    due_date: 2027-04-30
+    status: pending
+    owner: 永續發展室
+  - id: COMMITTEE-Q1
+    name: Q1 ESG委員會
+    category: G1-ESG治理
+    due_date: 2027-03-31
+    status: pending
+    owner: 永續發展室
+  - id: COMMITTEE-Q2
+    name: Q2 ESG委員會
+    category: G1-ESG治理
+    due_date: 2027-06-30
+    status: pending
+    owner: 永續發展室

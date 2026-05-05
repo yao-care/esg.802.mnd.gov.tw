@@ -1,0 +1,15 @@
+document_id: PLN-ANNUAL
+type: PLN
+title_zh: 年度 ESG 工作計畫
+title_en: Annual ESG Work Plan
+main:
+  zh: 年度ESG工作計畫.md
+status: active
+owner: 永續發展室
+effective_date: 2026-05-05
+next_review_date: 2027-05-05
+parent_policy: POL-ESG
+references:
+  - PRO-ESG-COMMITTEE
+  - MTX-TIMELINE
+  - FRM-PROGRESS
